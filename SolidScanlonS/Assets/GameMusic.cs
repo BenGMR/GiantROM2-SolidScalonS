@@ -5,12 +5,16 @@ public class GameMusic : MonoBehaviour {
     public AudioClip mainMusic;
     public AudioClip dramaMusic;
     public AudioClip finalBossMusic;
-
-    AudioListener mainListener;
+    
+    AudioSource source;
 
     void Start () {
+        
         DontDestroyOnLoad(this);
-        AudioSource.PlayClipAtPoint(mainMusic, Vector3.zero);
+        source = GetComponent<AudioSource>();
+        source.clip = mainMusic;
+        source.Play();
+        
     }
 	
 	void Update () {
@@ -19,6 +23,12 @@ public class GameMusic : MonoBehaviour {
 
     public void PlayMainMusic()
     {
-        
+        source.clip = mainMusic;
+        source.Play();
+    }
+
+    public void StopMusic()
+    { 
+        source.Stop();
     }
 }
