@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GameScript : MonoBehaviour {
     //todo: Script. Drew Image for talking. Later: Shooting, boss health, boss attacks
@@ -18,28 +19,32 @@ public class GameScript : MonoBehaviour {
 
     private bool justStartedFading = true;
     private bool startedGame = false;
-
-    CanvasGroup fadingTextGroup;
-    GameObject fadingTextObject;
+    bool FadeOut = false;
+    bool FadeIn = false;
+    int currentScriptIndex = -1;
+    bool waitingForSpaceBar = false;
+    CanvasGroup fadingTitleText;
+    GameObject fadingTitleObject;
     AudioSource source;
     GameObject charPanel;
     Image currentCharacter;
-
+    CanvasGroup charPanelCanvasGroup;
+    CanvasGroup textBoxCanvasGroup;
+    
+    List<CanvasGroup> fadingObjects = new List<CanvasGroup>();
 
     GameObject gameMusicObject;
     public AudioClip gameStartSound;
-    public bool Fade;
+
     public float FadeSpeed = .04f;
     public Sprite jeffImage;
     public Sprite jeffCreepyImage;
     public Sprite danImage;
 
 
-
-
     void Start () {
-        fadingTextObject = GameObject.Find("FadingText");
-        fadingTextGroup = fadingTextObject.GetComponent<CanvasGroup>();
+        fadingTitleObject = GameObject.Find("FadingText");
+        fadingTitleText = fadingTitleObject.GetComponent<CanvasGroup>();
 
         gameMusicObject = GameObject.Find("GameMusic");
         source = gameMusicObject.GetComponent<AudioSource>();
@@ -47,6 +52,8 @@ public class GameScript : MonoBehaviour {
         charPanel = GameObject.Find("CharacterPanel");
         currentCharacter = charPanel.GetComponent<Image>();
 
+        textBoxCanvasGroup = GameObject.Find("DialogBG").GetComponent<CanvasGroup>();
+        charPanelCanvasGroup = charPanel.GetComponent<CanvasGroup>();
 	}
 
     void CharacterSpeak(Characters character, string dialog)
@@ -76,9 +83,9 @@ public class GameScript : MonoBehaviour {
     float timePassed;
     public float TimePerChar = 1;
     int currentCharIndex = 0;
+
     void SpellOutDialog()
     {
-
             //make every letter of dialog appear individually
             timePassed += Time.deltaTime;
             if (timePassed >= TimePerChar)
@@ -90,6 +97,7 @@ public class GameScript : MonoBehaviour {
                 {
                     spellingOutDialog = false;
                 currentCharIndex = 0;
+                waitingForSpaceBar = true;
                 }
             }
         
@@ -101,9 +109,20 @@ public class GameScript : MonoBehaviour {
 
         if(startedGame)
         {
-            if (Input.GetKeyDown(KeyCode.T))
+            if (currentScriptIndex == -1)
             {
-                CharacterSpeak(Characters.JeffCreepy, "TESTTESTTESTTEST");
+                SetObjectsToFade(charPanelCanvasGroup, textBoxCanvasGroup);
+                FadeIn = true;
+                
+                currentScriptIndex++;
+                
+            }
+            else if(currentScriptIndex == 0)
+            {
+                if (!spellingOutDialog && !waitingForSpaceBar)
+                {
+                    CharacterSpeak(Characters.Jeff, script[currentScriptIndex]);
+                }
             }
             if (spellingOutDialog)
             {
@@ -114,34 +133,98 @@ public class GameScript : MonoBehaviour {
         {
             if (Input.GetKeyDown(KeyCode.Return))
             {
-                Fade = true;
-            }
-
-            if (Fade)
-            {
-                FadeTitleText();
+                FadeOut = true;
+                SetObjectsToFade(fadingTitleText);
             }
         }
 
-	}
+        if (waitingForSpaceBar && Input.GetKeyDown(KeyCode.Space))
+        {
+            waitingForSpaceBar = false;
+        }
+        if (FadeOut)
+        {
+            FadeObjectsOut();
+        }
+        else if (FadeIn)
+        {
+            FadeObjectsIn();
+        }
+    }
 
-    private void FadeTitleText()
+    private void SetObjectsToFade(params CanvasGroup[] objects)
+    {
+        fadingObjects.Clear();
+        for (int i = 0; i < objects.Length; i++)
+        {
+            fadingObjects.Add(objects[i]);
+        }
+    }
+
+    private void FadeObjectsOut()
     {
         if (justStartedFading)
         {
-            fadingTextGroup.alpha = 1;
+            FadeOut = true;
+            for (int i = 0; i < fadingObjects.Count; i++)
+            {
+                 fadingObjects[i].alpha = 1;
+            }
+            
             justStartedFading = false;
-            source.Stop();
-            source.volume = 1;
-            source.clip = gameStartSound;
-            source.PlayOneShot(gameStartSound);
+            if (!startedGame)
+            {
+                source.Stop();
+                source.volume = 1;
+                source.clip = gameStartSound;
+                source.PlayOneShot(gameStartSound);
+            }
         }
-        fadingTextGroup.alpha -= FadeSpeed;
-        if (fadingTextGroup.alpha <= 0)
+        for (int i = 0; i < fadingObjects.Count; i++)
         {
-            Fade = false;
-            justStartedFading = true;
-            startedGame = true;
+            fadingObjects[i].alpha -= FadeSpeed;
+            //if the last object was faded
+            if (i == fadingObjects.Count-1 && fadingObjects[i].alpha <= 0)
+            {
+                FadeOut = false;
+                justStartedFading = true;
+                if (!startedGame)
+                {
+                    startedGame = true;
+                }
+                
+            }
         }
+        
+    }
+
+    private void FadeObjectsIn()
+    {
+        if (justStartedFading)
+        {
+            FadeIn = true;
+            for (int i = 0; i < fadingObjects.Count; i++)
+            {
+                fadingObjects[i].alpha = 0;
+            }
+
+            justStartedFading = false;
+
+            if (!startedGame)
+            {
+                source.PlayOneShot(gameStartSound);
+            }
+        }
+        for (int i = 0; i < fadingObjects.Count; i++)
+        {
+            fadingObjects[i].alpha += FadeSpeed;
+            //if the last object was faded
+            if (i == fadingObjects.Count - 1 && fadingObjects[i].alpha >= 1)
+            {
+                FadeIn = false;
+                justStartedFading = true;
+            }
+        }
+
     }
 }
