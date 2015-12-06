@@ -5,33 +5,26 @@ public class PlayerControls : MonoBehaviour {
 
     public float MoveSpeed = .02f;
 
-    //GameObject leftCollider;
-    //CircleCollider2D leftCircle;
-    //GameObject rightCollider;
-    //GameObject topCollider;
-    //GameObject bottomCollider;
+
 
     void Start () {
-        //leftCollider = GameObject.Find("LeftHitBox");
-        //rightCollider = GameObject.Find("RightHitBox");
-        //topCollider = GameObject.Find("TopHitBox");
-        //bottomCollider = GameObject.Find("BottomHitBox");
     }
 
-	void Update () {
-        if (Input.GetKey(KeyCode.W))
+
+    void Update () {
+        if (Input.GetKey(KeyCode.UpArrow))
         {
             transform.Translate(0, MoveSpeed, 0);
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.LeftArrow))
         {
             transform.Translate(-MoveSpeed, 0, 0);
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.DownArrow))
         {
             transform.Translate(0, -MoveSpeed, 0);
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.RightArrow))
         {
             transform.Translate(MoveSpeed, 0, 0);
         }
