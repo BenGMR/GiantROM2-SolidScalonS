@@ -459,6 +459,10 @@ public class GameScript : MonoBehaviour
                     SetObjectsToFade(bossHealthCG, charPanelCanvasGroup);
                     TimePerChar = 0;
                 }
+                else if (currentScriptIndex == 49)
+                {
+                    Drew.GetComponent<SpriteRenderer>().sprite = Obama;
+                }
                 else if(currentScriptIndex == 50)
                 {
                     musicScript.PlayDramaticSting();
@@ -555,7 +559,8 @@ public class GameScript : MonoBehaviour
                     creditsSpeed = .01f;
                 }
                 CreditsText.transform.Translate(0,creditsSpeed, 0);
-                if (CreditsText.transform.position.y >= 23)
+                //Debug.Log(CreditsText.transform.position.y);
+                if (CreditsText.transform.position.y >= 27)
                 {
                     source.Stop();
                     secretEnding = true;
